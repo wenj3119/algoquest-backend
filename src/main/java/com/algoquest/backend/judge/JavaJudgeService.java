@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JavaJudgeService {
 
-    private static final Duration EXECUTION_TIMEOUT = Duration.ofSeconds(3);
+    private static final Duration EXECUTION_TIMEOUT = Duration.ofSeconds(10);
     private static final int RUNTIME_ERROR_EXIT_CODE = 2;
 
     public JudgeResult judge(long problemId, String code) {
