@@ -27,7 +27,7 @@ RUN ./gradlew clean bootJar -x test --no-daemon
 # ==============================
 # 2. 运行阶段
 # ==============================
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
 
