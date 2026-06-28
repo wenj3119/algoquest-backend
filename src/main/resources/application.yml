@@ -4,3 +4,24 @@ server:
 spring:
   application:
     name: algoquest-backend
+  profiles:
+    active: local  # default: local dev. Production MUST override with: SPRING_PROFILES_ACTIVE=prod
+  datasource:
+    url: jdbc:postgresql://localhost:5435/algoquest
+    username: algoquest
+    password: algoquest
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# JWT config — production MUST set JWT_SECRET env var (min 32 chars, ideally 64+)
+# TODO (security hardening): add refresh tokens, token revocation list
+app:
+  jwt:
+    secret: ${JWT_SECRET:algoquest-local-dev-secret-change-in-prod-min-32-chars-padding}
+    expiration-hours: 24

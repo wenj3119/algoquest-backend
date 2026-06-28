@@ -1,0 +1,16 @@
+# Production profile — activated by SPRING_PROFILES_ACTIVE=prod in the K8s Deployment
+# JWT_SECRET and DB credentials must be injected via K8s Secrets (see k8s/main-service-deployment-snippet.yaml)
+
+judge:
+  k8s:
+    namespace: judge-sandbox
+    # Use image digest (not tag) in production to prevent silent image replacement:
+    #   image: algoquest-judge@sha256:<digest>
+    image: algoquest-judge:1.0.0
+    execution-timeout-seconds: 15
+    job-ttl-seconds: 300
+    active-deadline-seconds: 30
+    cpu-limit: "1000m"
+    memory-limit: "256Mi"
+    tmpfs-size-limit: "64Mi"
+    api-timeout-seconds: 30
