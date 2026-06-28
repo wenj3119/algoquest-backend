@@ -1,0 +1,26 @@
+# Judge container image — minimal JDK, non-root, no network tools.
+# Build:  docker build -f Dockerfile.judge -t algoquest-judge:1.0.0 .
+# In production use image digest, not tag:
+#   docker inspect --format='{{index .RepoDigests 0}}' algoquest-judge:1.0.0
+FROM eclipse-temurin:21-jdk-alpine
+
+# Remove any network utilities that busybox or Alpine may include.
+# Even with deny-all-egress NetworkPolicy, defense-in-depth: no curl/wget/nc in the image.
+RUN apk del --purge curl wget busybox-extras 2>/dev/null || true \
+    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+
+# Verify nobody user exists (uid 65534); Alpine includes it by default.
+RUN id nobody
+
+# Bake the entrypoint script into the image (framework-controlled, not user-controlled).
+COPY --chown=nobody:nobody judge-image/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod 500 /usr/local/bin/entrypoint.sh
+
+# Switch to non-root user before final layer.
+USER nobody
+
+# Root filesystem will be further enforced read-only at runtime via
+# readOnlyRootFilesystem: true in the K8s SecurityContext.
+# The only writable path (/tmp) is provided by an emptyDir(memory) volume.
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
