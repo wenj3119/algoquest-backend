@@ -383,6 +383,54 @@ class ProblemServiceJudgeTest {
         assertTrue(response.hints().get(2).content().contains("方法名、变量名或 import"));
     }
 
+    @Test
+    void shouldNotTreatPrimeInputAsCompositeCase() {
+        // n=19 is prime; the old string-match "contains 9" would falsely flag it as composite
+        GenerateHintResponse response = hintService.generateHints(1L, new GenerateHintRequest(
+                "",
+                "failed",
+                "key_condition",
+                null,
+                new SubmitCodeResponse(
+                        "failed",
+                        2,
+                        4,
+                        "部分测试用例未通过。",
+                        List.of(new SubmitCaseResponse("n = 19", "true", "false", false))
+                )
+        ));
+
+        assertHintResponse(response);
+        assertFalse(
+                response.hints().get(0).content().contains("大于 1，但能被其他数整除"),
+                "n=19 is prime and must NOT trigger the composite hint"
+        );
+    }
+
+    @Test
+    void shouldTreatCompositeInputAsCompositeCase() {
+        // n=91 (7×13) is composite; must trigger the composite case hint
+        GenerateHintResponse response = hintService.generateHints(1L, new GenerateHintRequest(
+                "",
+                "failed",
+                "key_condition",
+                null,
+                new SubmitCodeResponse(
+                        "failed",
+                        2,
+                        4,
+                        "部分测试用例未通过。",
+                        List.of(new SubmitCaseResponse("n = 91", "false", "true", false))
+                )
+        ));
+
+        assertHintResponse(response);
+        assertTrue(
+                response.hints().get(0).content().contains("大于 1，但能被其他数整除"),
+                "n=91 is composite (7×13) and must trigger the composite hint"
+        );
+    }
+
     private void assertHintResponse(GenerateHintResponse response) {
         assertNotNull(response);
         assertEquals("mock", response.mode());

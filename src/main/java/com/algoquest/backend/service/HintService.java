@@ -179,8 +179,28 @@ public class HintService {
         if (failedCase == null) {
             return false;
         }
-        String input = failedCase.input();
-        return input.contains("9") || input.contains("15") || input.contains("21");
+        int eqIndex = failedCase.input().indexOf('=');
+        if (eqIndex < 0) {
+            return false;
+        }
+        try {
+            int n = Integer.parseInt(failedCase.input().substring(eqIndex + 1).trim());
+            return n >= 4 && !isPrimeNumber(n);
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
+    private boolean isPrimeNumber(int n) {
+        if (n < 2) {
+            return false;
+        }
+        for (int i = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String extractCompileMessage(GenerateHintRequest request) {
