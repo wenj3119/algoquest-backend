@@ -1,0 +1,41 @@
+# Production profile — activated by SPRING_PROFILES_ACTIVE=prod in the K8s Deployment
+# JWT_SECRET and DB credentials must be injected via K8s Secrets (see k8s/main-service-deployment-snippet.yaml)
+server:
+  port: 8080
+
+spring:
+  application:
+    name: algoquest-backend
+  datasource:
+    url: jdbc:postgresql://algoquest-postgress-stable:5432/app
+    username: app
+    password: algoquest
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# JWT config — production MUST set JWT_SECRET env var (min 32 chars, ideally 64+)
+# TODO (security hardening): add refresh tokens, token revocation list
+app:
+  jwt:
+    secret: ${JWT_SECRET:algoquest-local-dev-secret-change-in-test-min-32-chars-padding}
+    expiration-hours: 24
+
+judge:
+  k8s:
+    namespace: judge-sandbox
+    # Use image digest (not tag) in production to prevent silent image replacement:
+    #   image: algoquest-judge@sha256:<digest>
+    image: algoquest-judge:1.0.0
+    execution-timeout-seconds: 15
+    job-ttl-seconds: 300
+    active-deadline-seconds: 30
+    cpu-limit: "1000m"
+    memory-limit: "256Mi"
+    tmpfs-size-limit: "64Mi"
+    api-timeout-seconds: 30
