@@ -6,8 +6,6 @@ server:
 spring:
   application:
     name: algoquest-backend
-  profiles:
-    active: local  # default: local dev. Production MUST override with: SPRING_PROFILES_ACTIVE=prod
   datasource:
     url: jdbc:postgresql://algoquest-postgress-stable:5432/algoquest
     username: algoquest
